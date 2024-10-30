@@ -2,30 +2,32 @@ import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/firebaseConfig';
 import axios from 'axios';
 
-// Function to get suggested answer from Firebase
 export const getSuggestedAnswer = async (question) => {
   try {
-    const docRef = ref(storage, 'gs://audio-medical-asst.appspot.com/medical_questions_and_answers.txt');
+    const docRef = ref(storage, 'complete_medical_questions_and_answers.txt');
     const url = await getDownloadURL(docRef);
 
-    try {
-      // Fetch the file content from Firebase
-      const response = await axios.get(url);
-      const documentText = response.data;
+    const response = await axios.get(url);
+    const documentText = response.data;
+    const lines = documentText.split('\n');
 
-      // Split the text into lines
-      const lines = documentText.split('\n');
+    // Improved answer matching logic
+    const relevantLines = lines.filter(line => {
+      const questionWords = question.toLowerCase().split(' ');
+      return questionWords.every(word => 
+        line.toLowerCase().includes(word) && line.includes(':')
+      );
+    });
 
-      // Find an answer in the document that contains the question
-      const answer = lines.find(line => line.toLowerCase().includes(question.toLowerCase())) || "No answer found.";
-
+    if (relevantLines.length > 0) {
+      // Extract answer part (after colon)
+      const answer = relevantLines[0].split(':')[1].trim();
       return answer;
-    } catch (error) {
-      console.error("Error reading document:", error);
-      return "Error reading the medical document.";
     }
-  } catch (firebaseError) {
-    console.error("Error fetching document from Firebase:", firebaseError);
-    return "Failed to fetch the medical document.";
+
+    return "No answer found.";
+  } catch (error) {
+    console.error("Error in getSuggestedAnswer:", error);
+    throw new Error("Failed to fetch or process the answer");
   }
 };
