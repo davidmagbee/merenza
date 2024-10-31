@@ -12,11 +12,16 @@ const firebaseConfig = {
   };
 
 // Initialize Firebase
+let app;
+let storage;
 
-const app = initializeApp(firebaseConfig);
+try {
+    app = initializeApp(firebaseConfig);
+    storage = getStorage(app);
+    console.log('Firebase initialized successfully with bucket:', storage.app.options.storageBucket);
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+    throw error;
+}
 
-// Initialize Firebase storage
-const storage = getStorage(app);
-
-
-export { storage };
+export { storage, app };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AudioCapture from "./components/AudioCapture";
 import QuestionAnalyzer from "./components/QuestionAnalyzer";
-import { getSuggestedAnswer } from "./services/answerService";
+import { getSuggestedAnswer, debugStorage } from "./services/answerService";
 
 const App = () => {
   const [transcript, setTranscript] = useState("");
@@ -12,7 +12,7 @@ const App = () => {
 
   useEffect(() => {
     const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-    const url = "wss://api.openai.com/v1/realtime";
+    const url = "wss://api.openai.com/v1/realtime?model=whipser-1";
     
     const newWs = new WebSocket(url);
 
